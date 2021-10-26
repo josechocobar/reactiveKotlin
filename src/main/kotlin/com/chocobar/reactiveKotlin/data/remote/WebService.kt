@@ -5,7 +5,7 @@ import retrofit2.http.GET
 
 interface WebService {
 
-    @GET("popular?api_key=API_KEY&language=en-US&page=1")
+    @GET("popular?api_key=0a8956c5ce74c43236f60c0fe039e3c1&language=en-US&page=1")
     suspend fun getPopularMovies(): MovieRequest
 
     //@GET("/3/movie/")
