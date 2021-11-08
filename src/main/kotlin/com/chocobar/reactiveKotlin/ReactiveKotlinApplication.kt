@@ -1,12 +1,10 @@
 package com.chocobar.reactiveKotlin
 
-import com.chocobar.reactiveKotlin.data.models.Movie
-import com.chocobar.reactiveKotlin.data.models.MovieRequest
+import com.chocobar.reactiveKotlin.data.generator.Generator
 import com.chocobar.reactiveKotlin.data.remote.*
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.InternalCoroutinesApi
+import com.chocobar.reactiveKotlin.data.repository.RepoImp
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.runBlocking
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -16,28 +14,8 @@ class ReactiveKotlinApplication
 
 fun main(args: Array<String>) {
     runApplication<ReactiveKotlinApplication>(*args)
-    val remoteDataSource = RemoteDataSource()
-    val remoteRepo = RemoteRepoImp(remoteDataSource = RemoteDataSource())
-    val fakeRepo = MovieRequest(
-        results = listOf(
-            Movie(
-                true,
-                "Hola",
-                listOf(1, 2, 3),
-                12,
-                "ING",
-                "Chavo",
-                "un niño",
-                1.2,
-                "www.postre.com",
-                "20/10/2005",
-                "elchavo",
-                true,
-                5.6,
-                5
-            )
-        )
-    )
+
+    val remoteRepo = RepoImp(remoteDataSource = RemoteDataSource())
     val myFlow = flow {
         emit(remoteRepo.remoteDataSource.getPopularMovies())
     }
@@ -49,6 +27,8 @@ fun main(args: Array<String>) {
             .catch { }
             .collect() { elements ->
                 run {
+                    val generator = Generator(remoteRepo).guessOriginalLanguage()
+                    print("${generator[1].text}\n${generator[1].answer1}\n${generator[1].answer2}\n${generator[1].answer3}\n${generator[1].answer4}\n")
                     val size = elements.results?.size
                     size?.let {
                         for (i in 1..size) {
@@ -59,6 +39,7 @@ fun main(args: Array<String>) {
                 }
             }
     }
+
 
 
 }

@@ -1,0 +1,11 @@
+DROP TABLE IF EXISTS users;
+
+CREATE TABLE quests(
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    text VARCHAR(250) NOT NULL,
+    answer1 VARCHAR(250) NOT NULL,
+    answer2 VARCHAR(250) NOT NULL,
+    answer3 VARCHAR(250) NOT NULL,
+    answer4 VARCHAR(250) NOT NULL,
+    correct_answer VARCHAR(250) NOT NULL
+);

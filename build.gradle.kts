@@ -24,7 +24,7 @@ dependencies {
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-reactor")
-	runtimeOnly("com.h2database:h2")
+	implementation("com.h2database:h2")
 	runtimeOnly("io.r2dbc:r2dbc-h2")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("io.projectreactor:reactor-test")
@@ -36,6 +36,9 @@ dependencies {
 
 	//coroutines
 	implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.5.2")
+	//koin
+	implementation ("io.insert-koin:koin-core:3.0.1")
+	testImplementation ("io.insert-koin:koin-test:3.0.1")
 }
 
 tasks.withType<KotlinCompile> {
@@ -48,3 +51,4 @@ tasks.withType<KotlinCompile> {
 tasks.withType<Test> {
 	useJUnitPlatform()
 }
+
