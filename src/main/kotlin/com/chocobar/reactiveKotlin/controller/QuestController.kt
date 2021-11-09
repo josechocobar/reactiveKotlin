@@ -3,10 +3,9 @@ package com.chocobar.reactiveKotlin.controller
 import com.chocobar.reactiveKotlin.data.models.Quest
 import com.chocobar.reactiveKotlin.data.repository.QuestRepository
 import com.chocobar.reactiveKotlin.requests.QuestCreateRequest
-import com.chocobar.reactiveKotlin.requests.QuestUpdateRequest
+import com.chocobar.reactiveKotlin.requests.QuestUpdate
 import com.chocobar.reactiveKotlin.responses.PagingResponse
 import com.chocobar.reactiveKotlin.responses.QuestRequestResponse
-import com.chocobar.reactiveKotlin.responses.QuestUpdateResponse
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -65,32 +64,32 @@ class QuestController {
     @PatchMapping("/{questId}")
     suspend fun updateQuest(
         @PathVariable questId : Int,
-        @RequestBody @Valid questUpdateRequest : QuestUpdateRequest
-    ) : QuestUpdateResponse{
+        @RequestBody @Valid questUpdate : QuestUpdate
+    ) : QuestUpdate{
         var existingQuest = questRepository.findByid(questId).awaitFirstOrElse {
             throw ResponseStatusException(HttpStatus.NOT_FOUND,"Quest #${questId} doesn't  exit")
         }
-        val duplicateQuest = questUpdateRequest.id?.let { questRepository.findByid(it).awaitFirstOrNull() }
+        val duplicateQuest = questUpdate.id?.let { questRepository.findByid(it).awaitFirstOrNull() }
         if (duplicateQuest !=null && duplicateQuest.id !=questId){
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
-                "Duplicate user: user with id ${questUpdateRequest.id} already exist"
+                "Duplicate user: user with id ${questUpdate.id} already exist"
             )
         }
         val updatedQuest = try{
-        existingQuest.id = questUpdateRequest.id //Si la saco funca?
-        existingQuest.text = questUpdateRequest.text
-        existingQuest.answer1 = questUpdateRequest.answer1
-        existingQuest.answer2 = questUpdateRequest.answer2
-        existingQuest.answer3 = questUpdateRequest.answer3
-        existingQuest.answer4 = questUpdateRequest.answer4
-        existingQuest.correctAnswer = questUpdateRequest.correctAnswer
+        existingQuest.id = questUpdate.id //Si la saco funca?
+        existingQuest.text = questUpdate.text
+        existingQuest.answer1 = questUpdate.answer1
+        existingQuest.answer2 = questUpdate.answer2
+        existingQuest.answer3 = questUpdate.answer3
+        existingQuest.answer4 = questUpdate.answer4
+        existingQuest.correctAnswer = questUpdate.correctAnswer
         questRepository.save(existingQuest).awaitFirst()}
         catch (e:Exception){
             throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Unable to update quest",e)
         }
 
-        return QuestUpdateResponse(
+        return QuestUpdate(
             id = updatedQuest.id,
             text = updatedQuest.text,
             answer1 = updatedQuest.answer1,
