@@ -1,11 +1,16 @@
 package com.chocobar.reactiveKotlin.controller
 
+import com.chocobar.reactiveKotlin.data.generator.Generator
 import com.chocobar.reactiveKotlin.data.models.Quest
+import com.chocobar.reactiveKotlin.data.repository.QuestFetcherImplementation
 import com.chocobar.reactiveKotlin.data.repository.QuestRepository
 import com.chocobar.reactiveKotlin.requests.QuestCreateRequest
 import com.chocobar.reactiveKotlin.requests.QuestUpdate
 import com.chocobar.reactiveKotlin.responses.PagingResponse
 import com.chocobar.reactiveKotlin.responses.QuestRequestResponse
+import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.flow.onCompletion
 import kotlinx.coroutines.reactive.awaitFirst
 import kotlinx.coroutines.reactive.awaitFirstOrElse
 import kotlinx.coroutines.reactive.awaitFirstOrNull
@@ -23,10 +28,48 @@ class QuestController {
     @Autowired
     lateinit var questRepository: QuestRepository
 
+    val movieRequest = QuestFetcherImplementation()
+    val questFetcher=movieRequest.fetchQuest()
+    val questRemoteRepository = movieRequest.getRemoteRepository()
+
+    @GetMapping("/start")
+    suspend fun onStart() {
+        questFetcher.onCompletion {}
+            .catch {  }
+            .collect {
+                    val generator = Generator(questRemoteRepository).guessOriginalLanguage()
+                    generator.forEach {
+                        it.id=null
+                        try {
+                            questRepository.save(it).awaitFirstOrNull()
+                        }catch (e:Exception){
+                            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Unable to create quest",e)
+                        }
+                    }
+
+                    /*for(items in generator){
+                        val demoQuest= Quest(id = null,generator[items.id!!].text,generator[items.id!!].answer1,generator[items.id!!].answer2,generator[items.id!!].answer3,generator[items.id!!].answer4,generator[items.id!!].correctAnswer)
+                        val createdQuest = try {
+                            questRepository.save(demoQuest).awaitFirstOrNull()
+                        }catch (e:Exception){
+                            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Unable to create quest",e)
+                        }
+                        val id = createdQuest?.id ?:
+                        throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Missing id for created quest")
+                        //println(mapResponse(id,createdQuest))
+                    }
+
+                     */
+
+
+
+            }
+    }
+    @PostMapping("")
     suspend fun createQuest(
         @RequestBody @Valid request: QuestCreateRequest
     ): QuestRequestResponse {
-        var existingQuest = questRepository.findByid(request.id).awaitFirstOrNull()
+        var existingQuest = questRepository.findByText(request.text).awaitFirstOrNull()
         if(existingQuest !=null){
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Quest")
         }
@@ -47,7 +90,6 @@ class QuestController {
         val id = createdQuest?.id ?:
         throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Missing id for created quest")
         return mapResponse(id,createdQuest)
-
     }
 
     @GetMapping("")
@@ -77,7 +119,6 @@ class QuestController {
             )
         }
         val updatedQuest = try{
-        existingQuest.id = questUpdate.id //Si la saco funca?
         existingQuest.text = questUpdate.text
         existingQuest.answer1 = questUpdate.answer1
         existingQuest.answer2 = questUpdate.answer2
@@ -98,9 +139,6 @@ class QuestController {
             answer4 = updatedQuest.answer4,
             correctAnswer = updatedQuest.correctAnswer
         )
-
-
-
     }
 
     @DeleteMapping("/{questId}")
@@ -146,7 +184,7 @@ class QuestController {
 
 
     }
-    fun mapResponse(id:Int,quest: Quest):QuestRequestResponse{
+    fun mapResponse(id:Int,quest: Quest): QuestRequestResponse {
         return QuestRequestResponse(
             id = id,
             text = quest.text,
@@ -156,4 +194,6 @@ class QuestController {
             answer4 = quest.answer4
         )
     }
+
+
 }
