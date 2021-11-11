@@ -37,11 +37,17 @@ class QuestController {
         questFetcher.onCompletion {}
             .catch {  }
             .collect {
-
-            run {
                     val generator = Generator(questRemoteRepository).guessOriginalLanguage()
-                generator.run {
-                    for(items in generator){
+                    generator.forEach {
+                        it.id=null
+                        try {
+                            questRepository.save(it).awaitFirstOrNull()
+                        }catch (e:Exception){
+                            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Unable to create quest",e)
+                        }
+                    }
+
+                    /*for(items in generator){
                         val demoQuest= Quest(id = null,generator[items.id!!].text,generator[items.id!!].answer1,generator[items.id!!].answer2,generator[items.id!!].answer3,generator[items.id!!].answer4,generator[items.id!!].correctAnswer)
                         val createdQuest = try {
                             questRepository.save(demoQuest).awaitFirstOrNull()
@@ -52,9 +58,11 @@ class QuestController {
                         throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Missing id for created quest")
                         //println(mapResponse(id,createdQuest))
                     }
-                }
 
-                }
+                     */
+
+
+
             }
     }
     @PostMapping("")
@@ -82,7 +90,6 @@ class QuestController {
         val id = createdQuest?.id ?:
         throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Missing id for created quest")
         return mapResponse(id,createdQuest)
-
     }
 
     @GetMapping("")
@@ -112,7 +119,6 @@ class QuestController {
             )
         }
         val updatedQuest = try{
-        existingQuest.id = questUpdate.id //Si la saco funca?
         existingQuest.text = questUpdate.text
         existingQuest.answer1 = questUpdate.answer1
         existingQuest.answer2 = questUpdate.answer2
@@ -133,9 +139,6 @@ class QuestController {
             answer4 = updatedQuest.answer4,
             correctAnswer = updatedQuest.correctAnswer
         )
-
-
-
     }
 
     @DeleteMapping("/{questId}")
@@ -191,4 +194,6 @@ class QuestController {
             answer4 = quest.answer4
         )
     }
+
+
 }
