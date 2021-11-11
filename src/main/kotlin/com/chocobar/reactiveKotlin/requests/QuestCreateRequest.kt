@@ -3,8 +3,6 @@ package com.chocobar.reactiveKotlin.requests
 import javax.validation.constraints.NotEmpty
 
 data class QuestCreateRequest(
-    @field:NotEmpty
-    var id : Int,
 
     @field:NotEmpty
     var text : String,

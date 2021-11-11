@@ -44,6 +44,9 @@ class Generator(var repoImp: RepoImp) : IGenerator {
         }
         return listOfQuests
     }
+    fun getQuest()={
+
+    }
 
 
 }
