@@ -181,6 +181,21 @@ class QuestController {
             return mapResponse(randomEntityId,quest)
         }
         throw ResponseStatusException(HttpStatus.NOT_FOUND, "Error with id:$randomEntityId")
+    }
+    @GetMapping("/answer/{questId}")
+    suspend fun getAnswer(
+        @PathVariable questId: Int,
+        @RequestParam answer : String
+    ):Boolean{
+        val quest = try {
+            questRepository.findByid(questId).awaitFirst()
+        }catch (e:Exception){
+            throw ResponseStatusException(HttpStatus.NOT_FOUND,"No quest with id: $questId",e)
+        }
+        quest?.let {
+            return quest.correctAnswer == answer
+        }
+        throw ResponseStatusException(HttpStatus.NOT_FOUND, "Error with id:$questId")
 
 
     }
