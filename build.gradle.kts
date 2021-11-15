@@ -39,6 +39,11 @@ dependencies {
 	//koin
 	implementation ("io.insert-koin:koin-core:3.0.1")
 	testImplementation ("io.insert-koin:koin-test:3.0.1")
+
+	//openapi
+	implementation("org.springdoc:springdoc-openapi-webflux-ui:1.4.8")
+	implementation("org.springdoc:springdoc-openapi-kotlin:1.4.8")
+
 }
 
 tasks.withType<KotlinCompile> {

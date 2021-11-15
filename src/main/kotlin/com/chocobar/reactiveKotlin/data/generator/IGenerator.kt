@@ -5,6 +5,5 @@ import reactor.core.publisher.Flux
 
 interface IGenerator {
     suspend fun guessOriginalLanguage(): List<Quest>
-
-
+    suspend fun guessOverview() : List<Quest>
 }

@@ -8,6 +8,7 @@ import com.chocobar.reactiveKotlin.requests.QuestCreateRequest
 import com.chocobar.reactiveKotlin.requests.QuestUpdate
 import com.chocobar.reactiveKotlin.responses.PagingResponse
 import com.chocobar.reactiveKotlin.responses.QuestRequestResponse
+import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
@@ -29,48 +30,42 @@ class QuestController {
     lateinit var questRepository: QuestRepository
 
     val movieRequest = QuestFetcherImplementation()
-    val questFetcher=movieRequest.fetchQuest()
+    val questFetcher = movieRequest.fetchQuest()
     val questRemoteRepository = movieRequest.getRemoteRepository()
 
+    @Operation(operationId = "startDatabase", summary = "Fillup database")
     @GetMapping("/start")
     suspend fun onStart() {
-        questFetcher.onCompletion {}
-            .catch {  }
+        questFetcher.onCompletion { }
+            .catch { }
             .collect {
-                    val generator = Generator(questRemoteRepository).guessOriginalLanguage()
-                    generator.forEach {
-                        it.id=null
-                        try {
-                            questRepository.save(it).awaitFirstOrNull()
-                        }catch (e:Exception){
-                            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Unable to create quest",e)
-                        }
+                val generator = Generator(questRemoteRepository)
+                val guessOriginalLanguage = generator.guessOriginalLanguage()
+                val guessOverview = generator.guessOverview()
+                val bigList = guessOriginalLanguage.plus(guessOverview)
+                guessOriginalLanguage.forEach{
+                    println(it.toString())
+                }
+                /*bigList.forEach {
+                    it.id = null
+                    try {
+                        questRepository.save(it).awaitFirstOrNull()
+                        println("save all quests")
+                    } catch (e: Exception) {
+                        throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to create quest", e)
                     }
-
-                    /*for(items in generator){
-                        val demoQuest= Quest(id = null,generator[items.id!!].text,generator[items.id!!].answer1,generator[items.id!!].answer2,generator[items.id!!].answer3,generator[items.id!!].answer4,generator[items.id!!].correctAnswer)
-                        val createdQuest = try {
-                            questRepository.save(demoQuest).awaitFirstOrNull()
-                        }catch (e:Exception){
-                            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Unable to create quest",e)
-                        }
-                        val id = createdQuest?.id ?:
-                        throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Missing id for created quest")
-                        //println(mapResponse(id,createdQuest))
-                    }
-
-                     */
-
-
+                }*/
 
             }
     }
+
+    @Operation(operationId = "createQuest", summary = "Create Quest")
     @PostMapping("")
     suspend fun createQuest(
         @RequestBody @Valid request: QuestCreateRequest
     ): QuestRequestResponse {
         var existingQuest = questRepository.findByText(request.text).awaitFirstOrNull()
-        if(existingQuest !=null){
+        if (existingQuest != null) {
             throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Duplicate Quest")
         }
         val quest = Quest(
@@ -84,50 +79,53 @@ class QuestController {
         )
         val createdQuest = try {
             questRepository.save(quest).awaitFirstOrNull()
-        }catch (e:Exception){
-            throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Unable to create quest",e)
+        } catch (e: Exception) {
+            throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Unable to create quest", e)
         }
-        val id = createdQuest?.id ?:
-        throw ResponseStatusException(HttpStatus.BAD_REQUEST,"Missing id for created quest")
-        return mapResponse(id,createdQuest)
+        val id =
+            createdQuest?.id ?: throw ResponseStatusException(HttpStatus.BAD_REQUEST, "Missing id for created quest")
+        return mapResponse(id, createdQuest)
     }
 
+    @Operation(operationId = "listQuest", summary = "Get list of quests")
     @GetMapping("")
     suspend fun listQuest(
-        @RequestParam pageNo:Int = 1,
-        @RequestParam pageSize:Int = 10
+        @RequestParam pageNo: Int = 1,
+        @RequestParam pageSize: Int = 10
     ): PagingResponse<Quest> {
         var limit = pageSize
-        var offset = (limit*pageNo)-limit
-        var list = questRepository.findAllQuest(limit,offset).collectList().awaitFirst()
+        var offset = (limit * pageNo) - limit
+        var list = questRepository.findAllQuest(limit, offset).collectList().awaitFirst()
         val total = questRepository.count().awaitFirst()
         return PagingResponse(total, list)
     }
+
+    @Operation(operationId = "updateQuest", summary = "Update a Quest")
     @PatchMapping("/{questId}")
     suspend fun updateQuest(
-        @PathVariable questId : Int,
-        @RequestBody @Valid questUpdate : QuestUpdate
-    ) : QuestUpdate{
+        @PathVariable questId: Int,
+        @RequestBody @Valid questUpdate: QuestUpdate
+    ): QuestUpdate {
         var existingQuest = questRepository.findByid(questId).awaitFirstOrElse {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND,"Quest #${questId} doesn't  exit")
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Quest #${questId} doesn't  exit")
         }
         val duplicateQuest = questUpdate.id?.let { questRepository.findByid(it).awaitFirstOrNull() }
-        if (duplicateQuest !=null && duplicateQuest.id !=questId){
+        if (duplicateQuest != null && duplicateQuest.id != questId) {
             throw ResponseStatusException(
                 HttpStatus.BAD_REQUEST,
                 "Duplicate user: user with id ${questUpdate.id} already exist"
             )
         }
-        val updatedQuest = try{
-        existingQuest.text = questUpdate.text
-        existingQuest.answer1 = questUpdate.answer1
-        existingQuest.answer2 = questUpdate.answer2
-        existingQuest.answer3 = questUpdate.answer3
-        existingQuest.answer4 = questUpdate.answer4
-        existingQuest.correctAnswer = questUpdate.correctAnswer
-        questRepository.save(existingQuest).awaitFirst()}
-        catch (e:Exception){
-            throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR,"Unable to update quest",e)
+        val updatedQuest = try {
+            existingQuest.text = questUpdate.text
+            existingQuest.answer1 = questUpdate.answer1
+            existingQuest.answer2 = questUpdate.answer2
+            existingQuest.answer3 = questUpdate.answer3
+            existingQuest.answer4 = questUpdate.answer4
+            existingQuest.correctAnswer = questUpdate.correctAnswer
+            questRepository.save(existingQuest).awaitFirst()
+        } catch (e: Exception) {
+            throw ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Unable to update quest", e)
         }
 
         return QuestUpdate(
@@ -141,56 +139,61 @@ class QuestController {
         )
     }
 
+    @Operation(operationId = "deleteQuest", summary = "Delete Quest given id")
     @DeleteMapping("/{questId}")
     suspend fun deleteQuest(
         @PathVariable questId: Int
-    ){
+    ) {
         val existingQuest = questRepository.findByid(questId).awaitFirstOrElse {
-            throw ResponseStatusException(HttpStatus.NOT_FOUND,"Quest not found")
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "Quest not found")
         }
         questRepository.delete(existingQuest).subscribe()
     }
 
+    @Operation(operationId = "getQuest", summary = "Get a Quest given id")
     @GetMapping("/{questId}")
     suspend fun getQuest(
         @PathVariable questId: Int
-    ):QuestRequestResponse{
+    ): QuestRequestResponse {
         val quest = try {
             questRepository.findByid(questId).awaitFirst()
-        }catch (e:Exception){
-            throw ResponseStatusException(HttpStatus.NOT_FOUND,"No quest with id: $questId",e)
+        } catch (e: Exception) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No quest with id: $questId", e)
         }
         quest?.let {
-            return mapResponse(questId,quest)
+            return mapResponse(questId, quest)
         }
         throw ResponseStatusException(HttpStatus.NOT_FOUND, "Error with id:$questId")
 
 
     }
 
+    @Operation(operationId = "getRandomQuest", summary = "Get a random quest")
     @GetMapping("/random")
-    suspend fun getRandomQuest():QuestRequestResponse{
+    suspend fun getRandomQuest(): QuestRequestResponse {
         val entityNumbers = questRepository.count().awaitFirst()
-        val randomEntityId= (0 until entityNumbers-1).random().toInt()
+        val randomEntityId = (0 until entityNumbers - 1).random().toInt()
         val quest = try {
             questRepository.findByid(randomEntityId).awaitFirst()
-        }catch (e:Exception){
-            throw ResponseStatusException(HttpStatus.NOT_FOUND,"No quest with id: $randomEntityId",e)
+        } catch (e: Exception) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No quest with id: $randomEntityId", e)
         }
         quest?.let {
-            return mapResponse(randomEntityId,quest)
+            return mapResponse(randomEntityId, quest)
         }
         throw ResponseStatusException(HttpStatus.NOT_FOUND, "Error with id:$randomEntityId")
     }
+
+    @Operation(operationId = "getAnswer", summary = "Get correct answer")
     @GetMapping("/answer/{questId}")
     suspend fun getAnswer(
         @PathVariable questId: Int,
-        @RequestParam answer : String
-    ):Boolean{
+        @RequestParam answer: String
+    ): Boolean {
         val quest = try {
             questRepository.findByid(questId).awaitFirst()
-        }catch (e:Exception){
-            throw ResponseStatusException(HttpStatus.NOT_FOUND,"No quest with id: $questId",e)
+        } catch (e: Exception) {
+            throw ResponseStatusException(HttpStatus.NOT_FOUND, "No quest with id: $questId", e)
         }
         quest?.let {
             return quest.correctAnswer == answer
@@ -199,7 +202,8 @@ class QuestController {
 
 
     }
-    fun mapResponse(id:Int,quest: Quest): QuestRequestResponse {
+
+    fun mapResponse(id: Int, quest: Quest): QuestRequestResponse {
         return QuestRequestResponse(
             id = id,
             text = quest.text,

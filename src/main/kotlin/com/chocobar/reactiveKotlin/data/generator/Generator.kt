@@ -1,52 +1,83 @@
 package com.chocobar.reactiveKotlin.data.generator
 
+import com.chocobar.reactiveKotlin.data.models.Movie
 import com.chocobar.reactiveKotlin.data.models.Quest
 import com.chocobar.reactiveKotlin.data.repository.RepoImp
-import kotlinx.coroutines.*
-import reactor.core.publisher.Flux
 
 class Generator(var repoImp: RepoImp) : IGenerator {
     override suspend fun guessOriginalLanguage(): List<Quest> {
         val listOfQuests = mutableListOf<Quest>()
-
-        /*
-        aqui lo que tengo que hacer es generar la lista de las preguntas a partir de los datos en repo
-        luego de generar lo que tengo que hacer es guardarla en h2 de manera que se pueda leer a traves de una api rest
-        entonces lo primero a hacer es generar la lista
-         */
-
         val listOfMovies = repoImp.getMovieList().results
         val languageList = listOf<String>("en", "fr", "jp", "es")
-
-        /*
-        para generar la lista de las preguntas, lo que voy a hacer es definir las variables a tener en cuenta
-
-         */
-
-        listOfMovies?.size?.let {
-            for (i in 0 until it-1) {
-                val originalLanguage = listOfMovies[i].original_language
-                val languageMinus = languageList.shuffled()
-                listOfQuests.add(
-                    Quest(
-                        i + 1,
-                        text = "¿Cuál es el lenguaje original de la pelicula ${listOfMovies[i].original_title}?",
-                        answer1 = languageMinus[0],
-                        answer2 = languageMinus[1],
-                        answer3 = languageMinus[2],
-                        answer4 = languageMinus[3],
-                        correctAnswer = originalLanguage
-                    )
-                )
+        listOfMovies?.let {
+            listOfMovies.forEach {
+                listOfQuests.add(mapQuestLanguage(it.id, listOfMovies, languageList))
             }
-
-
         }
         return listOfQuests
     }
-    fun getQuest()={
+
+    private fun mapQuestLanguage(
+        id: Int,
+        listOfMovies: List<Movie>,
+        languageList: List<String>,
+    ): Quest {
+        val originalLanguage = listOfMovies[id].original_language
+        val languageMinus = languageList.shuffled()
+        return Quest(
+            id,
+            text = "¿Cuál es el lenguaje original de la pelicula ${listOfMovies[id].original_title}?",
+            answer1 = languageMinus[0],
+            answer2 = languageMinus[1],
+            answer3 = languageMinus[2],
+            answer4 = languageMinus[3],
+            correctAnswer = originalLanguage
+        )
+    }
+
+    override suspend fun guessOverview(): List<Quest> {
+        val listOfQuests = mutableListOf<Quest>()
+        val listOfMovies = repoImp.getMovieList().results
+        listOfMovies?.let {
+            val listofName = getName(listOfMovies)
+            it.forEach { movie ->
+                val randomNames = getRandomName(listofName)
+                randomNames.add(movie.original_title)
+                randomNames.shuffled()
+                listOfQuests.add(
+                    Quest(
+                        movie.id,
+                        text = "la siguiente reseña ${movie.overview} corresponde a... ",
+                        randomNames[0],
+                        randomNames[1],
+                        randomNames[2],
+                        randomNames[3],
+                        correctAnswer = movie.original_title
+                    )
+                )
+            }
+        }
+        return listOfQuests
 
     }
 
+    private fun getOverviews(listOfMovies: List<Movie>): List<String> {
+        val listOverview = mutableListOf<String>()
+        listOfMovies.forEach {
+            listOverview.add(it.overview)
+        }
+        return listOverview
+    }
 
+    private fun getName(listOfMovies: List<Movie>): List<String> {
+        val listOfNames = mutableListOf<String>()
+        listOfMovies.forEach {
+            listOfNames.add(it.original_title)
+        }
+        return listOfNames
+    }
+
+    private fun getRandomName(listOfNames: List<String>): MutableList<String> {
+        return listOfNames.shuffled().subList(0, 2) as MutableList<String>
+    }
 }

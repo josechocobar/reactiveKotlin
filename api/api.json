@@ -1,0 +1,412 @@
+{
+  "openapi": "3.0.1",
+  "info": {
+    "title": "Quest API",
+    "description": "Documentation for the Quest APi",
+    "version": "1.0"
+  },
+  "servers": [
+    {
+      "url": "http://localhost:8080/",
+      "description": "Generated server url"
+    }
+  ],
+  "paths": {
+    "/quests/start": {
+      "get": {
+        "tags": [
+          "quest-controller"
+        ],
+        "summary": "Fillup database",
+        "operationId": "startDatabase",
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      }
+    },
+    "/quests/{questId}": {
+      "get": {
+        "tags": [
+          "quest-controller"
+        ],
+        "summary": "Get a Quest given id",
+        "operationId": "getQuest",
+        "parameters": [
+          {
+            "name": "questId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "quest-controller"
+        ],
+        "summary": "Delete Quest given id",
+        "operationId": "deleteQuest",
+        "parameters": [
+          {
+            "name": "questId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "quest-controller"
+        ],
+        "summary": "Update a Quest",
+        "operationId": "updateQuest",
+        "parameters": [
+          {
+            "name": "questId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestUpdate"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestUpdate"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quests": {
+      "get": {
+        "tags": [
+          "quest-controller"
+        ],
+        "summary": "Get list of quests",
+        "operationId": "listQuest",
+        "parameters": [
+          {
+            "name": "pageNo",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "pageSize",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/PagingResponseQuest"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "quest-controller"
+        ],
+        "summary": "Create Quest",
+        "operationId": "createQuest",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/QuestCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quests/answer/{questId}": {
+      "get": {
+        "tags": [
+          "quest-controller"
+        ],
+        "summary": "Get correct answer",
+        "operationId": "getAnswer",
+        "parameters": [
+          {
+            "name": "questId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "format": "int32"
+            }
+          },
+          {
+            "name": "answer",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/quests/random": {
+      "get": {
+        "tags": [
+          "quest-controller"
+        ],
+        "summary": "Get a random quest",
+        "operationId": "getRandomQuest",
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/QuestRequestResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "QuestRequestResponse": {
+        "required": [
+          "answer1",
+          "answer2",
+          "answer3",
+          "answer4",
+          "id",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "text": {
+            "type": "string"
+          },
+          "answer1": {
+            "type": "string"
+          },
+          "answer2": {
+            "type": "string"
+          },
+          "answer3": {
+            "type": "string"
+          },
+          "answer4": {
+            "type": "string"
+          }
+        }
+      },
+      "QuestUpdate": {
+        "required": [
+          "answer1",
+          "answer2",
+          "answer3",
+          "answer4",
+          "correctAnswer",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "text": {
+            "type": "string"
+          },
+          "answer1": {
+            "type": "string"
+          },
+          "answer2": {
+            "type": "string"
+          },
+          "answer3": {
+            "type": "string"
+          },
+          "answer4": {
+            "type": "string"
+          },
+          "correctAnswer": {
+            "type": "string"
+          }
+        }
+      },
+      "PagingResponseQuest": {
+        "required": [
+          "items",
+          "total"
+        ],
+        "type": "object",
+        "properties": {
+          "total": {
+            "type": "integer",
+            "format": "int64"
+          },
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Quest"
+            }
+          }
+        }
+      },
+      "Quest": {
+        "required": [
+          "answer1",
+          "answer2",
+          "answer3",
+          "answer4",
+          "correctAnswer",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer",
+            "format": "int32"
+          },
+          "text": {
+            "type": "string"
+          },
+          "answer1": {
+            "type": "string"
+          },
+          "answer2": {
+            "type": "string"
+          },
+          "answer3": {
+            "type": "string"
+          },
+          "answer4": {
+            "type": "string"
+          },
+          "correctAnswer": {
+            "type": "string"
+          }
+        }
+      },
+      "QuestCreateRequest": {
+        "required": [
+          "answer1",
+          "answer2",
+          "answer3",
+          "answer4",
+          "correctAnswer",
+          "text"
+        ],
+        "type": "object",
+        "properties": {
+          "text": {
+            "type": "string"
+          },
+          "answer1": {
+            "type": "string"
+          },
+          "answer2": {
+            "type": "string"
+          },
+          "answer3": {
+            "type": "string"
+          },
+          "answer4": {
+            "type": "string"
+          },
+          "correctAnswer": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  }
+}
