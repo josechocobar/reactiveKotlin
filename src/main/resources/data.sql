@@ -2,10 +2,10 @@ DROP TABLE IF EXISTS quests;
 
 CREATE TABLE quests(
     id INT AUTO_INCREMENT PRIMARY KEY,
-    text VARCHAR(250) NOT NULL,
-    answer1 VARCHAR(250) NOT NULL,
-    answer2 VARCHAR(250) NOT NULL,
-    answer3 VARCHAR(250) NOT NULL,
-    answer4 VARCHAR(250) NOT NULL,
-    correct_answer VARCHAR(250) NOT NULL
+    text VARCHAR(5000) NOT NULL,
+    answer1 VARCHAR(2500) NOT NULL,
+    answer2 VARCHAR(2500) NOT NULL,
+    answer3 VARCHAR(2500) NOT NULL,
+    answer4 VARCHAR(2500) NOT NULL,
+    correct_answer VARCHAR(2500) NOT NULL
 );
