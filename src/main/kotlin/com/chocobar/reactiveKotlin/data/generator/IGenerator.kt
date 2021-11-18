@@ -4,7 +4,7 @@ import com.chocobar.reactiveKotlin.data.models.Quest
 import reactor.core.publisher.Flux
 
 interface IGenerator {
-    suspend fun guessOriginalLanguage(): List<Quest>
+    suspend fun generateQuest(): List<Quest>
 
 
 }

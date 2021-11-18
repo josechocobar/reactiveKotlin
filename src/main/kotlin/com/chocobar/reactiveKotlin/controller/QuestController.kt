@@ -37,9 +37,9 @@ class QuestController {
         questFetcher.onCompletion {}
             .catch {  }
             .collect {
-                    val generator = Generator(questRemoteRepository).guessOriginalLanguage()
+                    val generator = Generator(questRemoteRepository).generateQuest()
                     generator.forEach {
-                        it.id=null
+                        //it.id=null
                         try {
                             questRepository.save(it).awaitFirstOrNull()
                         }catch (e:Exception){

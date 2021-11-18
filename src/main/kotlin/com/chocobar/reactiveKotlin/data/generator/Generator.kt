@@ -1,12 +1,11 @@
 package com.chocobar.reactiveKotlin.data.generator
 
+import com.chocobar.reactiveKotlin.data.models.Movie
 import com.chocobar.reactiveKotlin.data.models.Quest
 import com.chocobar.reactiveKotlin.data.repository.RepoImp
-import kotlinx.coroutines.*
-import reactor.core.publisher.Flux
 
 class Generator(var repoImp: RepoImp) : IGenerator {
-    override suspend fun guessOriginalLanguage(): List<Quest> {
+    override suspend fun generateQuest(): List<Quest> {
         val listOfQuests = mutableListOf<Quest>()
 
         /*
@@ -23,30 +22,60 @@ class Generator(var repoImp: RepoImp) : IGenerator {
 
          */
 
-        listOfMovies?.size?.let {
-            for (i in 0 until it-1) {
-                val originalLanguage = listOfMovies[i].original_language
-                val languageMinus = languageList.shuffled()
-                listOfQuests.add(
-                    Quest(
-                        i + 1,
-                        text = "¿Cuál es el lenguaje original de la pelicula ${listOfMovies[i].original_title}?",
-                        answer1 = languageMinus[0],
-                        answer2 = languageMinus[1],
-                        answer3 = languageMinus[2],
-                        answer4 = languageMinus[3],
-                        correctAnswer = originalLanguage
-                    )
-                )
+        listOfMovies?.let {
+            it.forEach { movie->
+                listOfQuests.add(originalLanguage(movie,languageList))
+                listOfQuests.add(overviewQuest(movie,listOfMovies))
             }
-
-
+            return listOfQuests
         }
-        return listOfQuests
-    }
-    fun getQuest()={
-
+        throw Exception("Error en ")
     }
 
+    private fun originalLanguage(
+        movie: Movie,
+        languageList:List<String>
+    ): Quest {
+            val originalLanguage = movie.original_language
+            val languageMinus = languageList.shuffled()
+            return (
+                Quest(
+                    null,
+                    text = "¿Cuál es el lenguaje original de la pelicula ${movie.original_title}?",
+                    answer1 = languageMinus[0],
+                    answer2 = languageMinus[1],
+                    answer3 = languageMinus[2],
+                    answer4 = languageMinus[3],
+                    correctAnswer = originalLanguage
+                )
+            )
+
+    }
+    private fun overviewQuest(movie: Movie,listOfMovie: List<Movie>):Quest{
+        val originalOverView = movie.overview
+        val listExceptuation = listOfMovie.minus(movie)
+        val listShuffled = listExceptuation.shuffled()
+        val listStrim = listShuffled.subList(0,3)
+        val listOfTitles= mutableListOf<String>()
+        listStrim.forEach {
+            listOfTitles.add(it.original_title)
+        }
+        listOfTitles.add(movie.original_title)
+        val listOfShuffledAgain = listOfTitles.shuffled()
+        try {
+            return Quest(
+                id = null,
+                text = originalOverView,
+                answer1 = listOfShuffledAgain[0],
+                answer2 = listOfShuffledAgain[1],
+                answer3 = listOfShuffledAgain[2],
+                answer4 = listOfShuffledAgain[3],
+                correctAnswer = movie.original_title
+            )
+        }catch (e:Exception){
+            println("Error en quest generations porque ${e.message}")
+            throw Exception("error en quest gen", e)
+        }
+    }
 
 }
