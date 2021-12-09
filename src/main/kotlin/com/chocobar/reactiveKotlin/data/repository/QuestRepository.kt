@@ -14,9 +14,5 @@ interface QuestRepository : R2dbcRepository<Quest, Int> {
     @Query("SELECT * FROM questS limit :limit offset :offset")
     fun findAllQuest(limit: Int, offset: Int): Flux<Quest>
 
-    fun findByText(text:String) : Mono<Quest>
-
-
-
-
+    fun findByText(text: String): Mono<Quest>
 }

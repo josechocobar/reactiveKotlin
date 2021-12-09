@@ -5,7 +5,7 @@ import com.chocobar.reactiveKotlin.data.models.Quest
 import kotlinx.coroutines.flow.Flow
 
 
-interface QuestsFetcherInterface{
-    fun fetchQuest():Flow<MovieRequest>
-    fun getRemoteRepository():RepoImp
+interface QuestsFetcherInterface {
+    fun fetchQuest(): Flow<MovieRequest>
+    fun getRemoteRepository(): RepoImp
 }

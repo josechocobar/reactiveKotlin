@@ -5,6 +5,4 @@ import com.chocobar.reactiveKotlin.data.models.Quest
 
 interface IRepo {
     suspend fun getMovieList(): MovieRequest
-
-
 }

@@ -8,14 +8,14 @@ import retrofit2.converter.gson.GsonConverterFactory
 import java.util.concurrent.TimeUnit
 
 object RetrofitService {
-    private val client : OkHttpClient  = OkHttpClient.Builder()
+    private val client: OkHttpClient = OkHttpClient.Builder()
         .connectTimeout(10, TimeUnit.SECONDS)
-        .writeTimeout(10,TimeUnit.SECONDS)
-        .readTimeout(10,TimeUnit.SECONDS)
-        .callTimeout(10,TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
+        .readTimeout(10, TimeUnit.SECONDS)
+        .callTimeout(10, TimeUnit.SECONDS)
         .build()
 
-    val webService : WebService by lazy {
+    val webService: WebService by lazy {
         Retrofit.Builder()
             .baseUrl(API_URL)
             .client(client)

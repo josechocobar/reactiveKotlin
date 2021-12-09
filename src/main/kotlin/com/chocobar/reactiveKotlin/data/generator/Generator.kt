@@ -23,9 +23,9 @@ class Generator(var repoImp: RepoImp) : IGenerator {
          */
 
         listOfMovies?.let {
-            it.forEach { movie->
-                listOfQuests.add(originalLanguage(movie,languageList))
-                listOfQuests.add(overviewQuest(movie,listOfMovies))
+            it.forEach { movie ->
+                listOfQuests.add(originalLanguage(movie, languageList))
+                listOfQuests.add(overviewQuest(movie, listOfMovies))
             }
             return listOfQuests
         }
@@ -34,11 +34,11 @@ class Generator(var repoImp: RepoImp) : IGenerator {
 
     private fun originalLanguage(
         movie: Movie,
-        languageList:List<String>
+        languageList: List<String>
     ): Quest {
-            val originalLanguage = movie.original_language
-            val languageMinus = languageList.shuffled()
-            return (
+        val originalLanguage = movie.original_language
+        val languageMinus = languageList.shuffled()
+        return (
                 Quest(
                     null,
                     text = "¿Cuál es el lenguaje original de la pelicula ${movie.original_title}?",
@@ -48,15 +48,16 @@ class Generator(var repoImp: RepoImp) : IGenerator {
                     answer4 = languageMinus[3],
                     correctAnswer = originalLanguage
                 )
-            )
+                )
 
     }
-    private fun overviewQuest(movie: Movie,listOfMovie: List<Movie>):Quest{
+
+    private fun overviewQuest(movie: Movie, listOfMovie: List<Movie>): Quest {
         val originalOverView = movie.overview
         val listExceptuation = listOfMovie.minus(movie)
         val listShuffled = listExceptuation.shuffled()
-        val listStrim = listShuffled.subList(0,3)
-        val listOfTitles= mutableListOf<String>()
+        val listStrim = listShuffled.subList(0, 3)
+        val listOfTitles = mutableListOf<String>()
         listStrim.forEach {
             listOfTitles.add(it.original_title)
         }
@@ -72,7 +73,7 @@ class Generator(var repoImp: RepoImp) : IGenerator {
                 answer4 = listOfShuffledAgain[3],
                 correctAnswer = movie.original_title
             )
-        }catch (e:Exception){
+        } catch (e: Exception) {
             println("Error en quest generations porque ${e.message}")
             throw Exception("error en quest gen", e)
         }

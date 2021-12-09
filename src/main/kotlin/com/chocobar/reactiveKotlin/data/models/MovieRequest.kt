@@ -12,4 +12,5 @@ data class MovieRequest(
     var page: Int = 0,
     @SerializedName("results")
     @Expose
-    var results: List<Movie>? = null)
+    var results: List<Movie>? = null
+)

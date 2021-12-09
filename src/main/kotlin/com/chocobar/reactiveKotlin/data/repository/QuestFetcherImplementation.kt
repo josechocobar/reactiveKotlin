@@ -5,7 +5,7 @@ import com.chocobar.reactiveKotlin.data.remote.RemoteDataSource
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 
-class QuestFetcherImplementation:QuestsFetcherInterface {
+class QuestFetcherImplementation : QuestsFetcherInterface {
 
     val remoteRepo = RepoImp(remoteDataSource = RemoteDataSource())
     override fun fetchQuest(): Flow<MovieRequest> = flow {

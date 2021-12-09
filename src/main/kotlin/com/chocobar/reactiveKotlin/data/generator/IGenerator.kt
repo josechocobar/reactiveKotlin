@@ -5,6 +5,4 @@ import reactor.core.publisher.Flux
 
 interface IGenerator {
     suspend fun generateQuest(): List<Quest>
-
-
 }
