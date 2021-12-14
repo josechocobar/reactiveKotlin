@@ -8,6 +8,7 @@ import com.chocobar.reactiveKotlin.requests.QuestCreateRequest
 import com.chocobar.reactiveKotlin.requests.QuestUpdate
 import com.chocobar.reactiveKotlin.responses.PagingResponse
 import com.chocobar.reactiveKotlin.responses.QuestRequestResponse
+import io.swagger.v3.oas.annotations.Operation
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.onCompletion
@@ -32,6 +33,7 @@ class QuestController {
     val questFetcher = movieRequest.fetchQuest()
     val questRemoteRepository = movieRequest.getRemoteRepository()
 
+    @Operation(operationId = "start",summary = "create all random quests")
     @GetMapping("/start")
     suspend fun onStart() {
         questFetcher.onCompletion {}
@@ -48,6 +50,7 @@ class QuestController {
             }
     }
 
+    @Operation(operationId = "createQuest",summary = "Create quest")
     @PostMapping("")
     suspend fun createQuest(
         @RequestBody @Valid request: QuestCreateRequest
@@ -75,6 +78,7 @@ class QuestController {
         return mapResponse(id, createdQuest)
     }
 
+    @Operation(operationId = "listQuest",summary = "List of 10 quest")
     @GetMapping("")
     suspend fun listQuest(
         @RequestParam pageNo: Int = 1,
@@ -87,6 +91,7 @@ class QuestController {
         return PagingResponse(total, list)
     }
 
+    @Operation(operationId = "updateQuest",summary = "Update quest")
     @PatchMapping("/{questId}")
     suspend fun updateQuest(
         @PathVariable questId: Int,
@@ -125,6 +130,7 @@ class QuestController {
         )
     }
 
+    @Operation(operationId = "deleteQuest",summary = "Delete a quest with id number")
     @DeleteMapping("/{questId}")
     suspend fun deleteQuest(
         @PathVariable questId: Int
@@ -135,6 +141,7 @@ class QuestController {
         questRepository.delete(existingQuest).subscribe()
     }
 
+    @Operation(operationId = "getQuest",summary = "Get a quest with id number")
     @GetMapping("/{questId}")
     suspend fun getQuest(
         @PathVariable questId: Int
@@ -150,6 +157,7 @@ class QuestController {
         throw ResponseStatusException(HttpStatus.NOT_FOUND, "Error with id:$questId")
     }
 
+    @Operation(operationId = "getRandomQuest",summary = "Get a random quest")
     @GetMapping("/random")
     suspend fun getRandomQuest(): QuestRequestResponse {
         val entityNumbers = questRepository.count().awaitFirst()
@@ -165,6 +173,7 @@ class QuestController {
         throw ResponseStatusException(HttpStatus.NOT_FOUND, "Error with id:$randomEntityId")
     }
 
+    @Operation(operationId = "getAnswer",summary = "Get answer as a boolean value")
     @GetMapping("/answer/{questId}")
     suspend fun getAnswer(
         @PathVariable questId: Int,
